@@ -1,0 +1,23 @@
+{
+  "lastChangelogVersion": "0.79.1",
+  "defaultProvider": "opencode-go",
+  "defaultModel": "mimo-v2.5-pro",
+  "defaultThinkingLevel": "high",
+  "enabledModels": [
+    "opencode-go/deepseek-v4-pro",
+    "opencode-go/mimo-v2.5-pro",
+    "openrouter/moonshotai/kimi-k2.6",
+    "openrouter/deepseek/deepseek-v4-pro",
+    "opencode-go/mimo-v2.5",
+    "opencode-go/kimi-k2.6",
+    "opencode-go/minimax-m3"
+  ],
+  "editorPaddingX": 0,
+  "hideThinkingBlock": true,
+  "terminal": {
+    "showTerminalProgress": true
+  },
+  "packages": [
+    "npm:pi-hashline-edit"
+  ]
+}
