@@ -1,7 +1,7 @@
 {
-  "lastChangelogVersion": "0.79.1",
+  "lastChangelogVersion": "0.79.7",
   "defaultProvider": "opencode-go",
-  "defaultModel": "mimo-v2.5-pro",
+  "defaultModel": "kimi-k2.7-code",
   "defaultThinkingLevel": "high",
   "enabledModels": [
     "opencode-go/deepseek-v4-pro",
@@ -10,7 +10,8 @@
     "openrouter/deepseek/deepseek-v4-pro",
     "opencode-go/mimo-v2.5",
     "opencode-go/kimi-k2.6",
-    "opencode-go/minimax-m3"
+    "opencode-go/minimax-m3",
+    "opencode-go/kimi-k2.7-code"
   ],
   "editorPaddingX": 0,
   "hideThinkingBlock": true,
@@ -19,5 +20,6 @@
   },
   "packages": [
     "npm:pi-hashline-edit"
-  ]
+  ],
+  "theme": "dark"
 }
