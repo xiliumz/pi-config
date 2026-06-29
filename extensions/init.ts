@@ -17,7 +17,7 @@ Now, generate the AGENTS.md file using the following strict structure. Do not le
 - **Entrypoints:** The main binaries, server starts, or CLI entry files.
 
 ### 2. Directory Structure (The Map)
-Provide a tree-like breakdown, but specifically annotate the *purpose* of each major folder (e.g., src/hooks/ -> Custom React hooks, src/repos/ -> Database repository patterns). Explain where **new files of a specific type** must be placed.
+Provide a tree-like breakdown, but specifically annotate the *purpose* of each major directory (e.g., src/hooks/ -> Custom React hooks, src/repos/ -> Database repository patterns). Explain where **new files of a specific type** must be placed.
 
 ### 3. Development Commands (The Handbook)
 Provide exact, copy-pasteable terminal commands for:
@@ -65,19 +65,56 @@ List specific files the AI should *always* read before making global changes (e.
 
 ---
 
-**Output Formatting:** Return the final content as a clean, raw Markdown block. Make it verbose enough to remove ambiguity but concise enough for fast AI context loading. Save it as AGENTS.md in the project root. Then create CLAUDE.md as a copy/symlink of AGENTS.md (or identical content) so Claude Code also loads it. Confirm the files were written and summarize the key conventions you discovered.`;
+**Output Formatting:** Return the final content as a clean, raw Markdown block. Make it verbose enough to remove ambiguity but concise enough for fast AI context loading. Save it as AGENTS.md in the project root. Do NOT create CLAUDE.md — the extension will create it as a symlink after you finish writing AGENTS.md. Confirm AGENTS.md was written and summarize the key conventions you discovered.`;
 
 export default function initExtension(pi: ExtensionAPI) {
 	pi.registerCommand("init", {
-		description: "Generate AGENTS.md and CLAUDE.md from the current codebase",
+		description: "Generate AGENTS.md and CLAUDE.md (symlink) from the current codebase",
 		handler: async (_args, ctx) => {
 			if (!ctx.isIdle()) {
 				ctx.ui.notify("Agent is busy. Wait for it to finish, then run /init again.", "warning");
 				return;
 			}
 
-			ctx.ui.notify("Analyzing codebase and generating AGENTS.md + CLAUDE.md...", "info");
+			ctx.ui.notify("Analyzing codebase and generating AGENTS.md...", "info");
 			pi.sendUserMessage(INIT_PROMPT);
+
+			try {
+				await ctx.waitForIdle();
+			} catch (err) {
+				ctx.ui.notify(`Agent turn failed: ${err instanceof Error ? err.message : String(err)}`, "error");
+				return;
+			}
+
+			const fs = await import("node:fs");
+			const path = await import("node:path");
+
+			const agentsPath = path.join(ctx.cwd, "AGENTS.md");
+			const claudePath = path.join(ctx.cwd, "CLAUDE.md");
+
+			if (!fs.existsSync(agentsPath)) {
+				ctx.ui.notify("AGENTS.md was not created. Symlink not created.", "error");
+				return;
+			}
+
+			try {
+				if (fs.existsSync(claudePath)) {
+					const stat = fs.lstatSync(claudePath);
+					if (stat.isSymbolicLink()) {
+						const target = fs.readlinkSync(claudePath);
+						if (target === "AGENTS.md" || path.resolve(ctx.cwd, target) === agentsPath) {
+							ctx.ui.notify("CLAUDE.md is already symlinked to AGENTS.md.", "info");
+							return;
+						}
+					}
+					fs.rmSync(claudePath, { recursive: true, force: true });
+				}
+
+				fs.symlinkSync("AGENTS.md", claudePath);
+				ctx.ui.notify("Created CLAUDE.md -> AGENTS.md symlink.", "info");
+			} catch (err) {
+				ctx.ui.notify(`Failed to create CLAUDE.md symlink: ${err instanceof Error ? err.message : String(err)}`, "error");
+			}
 		},
 	});
 }
