@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Print all compaction summaries from sessions in the current bucket.
+# Compaction summaries are pre-digested gists — read these first.
+set -eu
+inner=$(echo "${PWD#/}" | tr '/' '-')
+BUCKET="${HOME}/.pi/agent/sessions/--${inner}--/"
+shopt -s nullglob
+files=("$BUCKET"*.jsonl)
+if [[ ${#files[@]} -eq 0 ]]; then
+  echo "(no sessions in $BUCKET)" >&2
+  exit 0
+fi
+for f in "${files[@]}"; do
+  found=$(grep -hoE '"summary":"[^"]+"' "$f" 2>/dev/null | sed 's/^"summary":"//;s/"$//')
+  if [[ -n "$found" ]]; then
+    echo "--- $(basename "$f") ---"
+    echo "$found"
+    echo
+  fi
+done

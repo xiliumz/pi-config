@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# One block per session in the current bucket:
+#   file · mtime · session name · first user message preview.
+# Cheap triage — no full body reads. Sorted newest first.
+set -eu
+inner=$(echo "${PWD#/}" | tr '/' '-')
+BUCKET="${HOME}/.pi/agent/sessions/--${inner}--/"
+
+shopt -s nullglob
+# Sort files by mtime, newest first.
+files=($(ls -t "$BUCKET"*.jsonl 2>/dev/null))
+if [[ ${#files[@]} -eq 0 ]]; then
+  echo "(no sessions in $BUCKET)" >&2
+  exit 0
+fi
+
+for f in "${files[@]}"; do
+  ts=$(stat -c %y "$f" | cut -d. -f1)
+  # Session name lives in a session_info entry, NOT in tool call args.
+  # Filter on the entry's "type":"session_info" first, then extract name.
+  name=$(grep '"type":"session_info"' "$f" 2>/dev/null \
+         | tail -1 \
+         | grep -oE '"name":"[^"]*"' \
+         | sed 's/^"name":"//;s/"$//')
+  # First user message: find first line with role:user, pull its first text block.
+  preview=$(grep -m1 '"role":"user"' "$f" 2>/dev/null \
+            | grep -oE '"text":"[^"]{0,140}' \
+            | head -1 \
+            | sed 's/^"text":"//')
+  echo "▸ $(basename "$f")  [$ts]  name=${name:-<unnamed>}"
+  echo "    ${preview:-(no user message)}"
+  echo
+done

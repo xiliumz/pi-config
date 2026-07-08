@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Print the current cwd's pi session bucket path.
+# Encoding: strip leading '/', replace each '/' with '-', wrap in '--'.
+set -eu
+inner=$(echo "${PWD#/}" | tr '/' '-')
+echo "${HOME}/.pi/agent/sessions/--${inner}--/"
