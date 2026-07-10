@@ -1,7 +1,7 @@
 {
-  "lastChangelogVersion": "0.79.7",
+  "lastChangelogVersion": "0.80.6",
   "defaultProvider": "opencode-go",
-  "defaultModel": "kimi-k2.7-code",
+  "defaultModel": "minimax-m3",
   "defaultThinkingLevel": "high",
   "enabledModels": [
     "opencode-go/deepseek-v4-pro",
