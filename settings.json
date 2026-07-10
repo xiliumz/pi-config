@@ -19,9 +19,25 @@
     "showTerminalProgress": true
   },
   "packages": [
-    "npm:pi-hashline-edit",
+    {
+      "source": "npm:pi-hashline-edit",
+      "extensions": [
+        "-index.ts"
+      ],
+      "prompts": [
+        "-prompts/edit-guidelines.md",
+        "-prompts/edit-snippet.md",
+        "-prompts/edit.md",
+        "-prompts/grep-snippet.md",
+        "-prompts/grep.md",
+        "-prompts/read-snippet.md",
+        "-prompts/read-guidelines.md",
+        "-prompts/read.md"
+      ]
+    },
     "npm:context-mode",
-    "npm:pi-mcp-adapter"
+    "npm:pi-mcp-adapter",
+    "npm:pi-simplify"
   ],
   "theme": "dark"
 }
