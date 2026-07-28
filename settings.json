@@ -1,20 +1,13 @@
 {
-  "lastChangelogVersion": "0.80.6",
-  "defaultProvider": "opencode-go",
-  "defaultModel": "minimax-m3",
+  "lastChangelogVersion": "0.80.10",
+  "defaultProvider": "xai",
+  "defaultModel": "grok-4.5",
   "defaultThinkingLevel": "high",
   "enabledModels": [
-    "opencode-go/deepseek-v4-pro",
-    "opencode-go/mimo-v2.5-pro",
-    "openrouter/moonshotai/kimi-k2.6",
-    "openrouter/deepseek/deepseek-v4-pro",
-    "opencode-go/mimo-v2.5",
-    "opencode-go/kimi-k2.6",
-    "opencode-go/minimax-m3",
-    "opencode-go/kimi-k2.7-code"
+    "xai/grok-4.5"
   ],
   "editorPaddingX": 0,
-  "hideThinkingBlock": true,
+  "hideThinkingBlock": false,
   "terminal": {
     "showTerminalProgress": true
   },
@@ -36,7 +29,8 @@
       ]
     },
     "npm:context-mode",
-    "npm:pi-mcp-adapter"
+    "npm:pi-mcp-adapter",
+    "/home/dayatani/pria-random/pi-bash-layout"
   ],
   "theme": "dark"
 }
