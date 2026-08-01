@@ -13,6 +13,11 @@ Now, generate the AGENTS.md file using the following strict structure. Do not le
 ### 1. Project Overview & Philosophy
 - **Name/Description:** Brief summary of what this repo does.
 - **Core Tenets:** (e.g., Performance-first, Type-safety, Simplicity). Identify these from the code style.
+- **Development Principles:** Always include these exactly (do not omit or weaken):
+  - **KISS** — Prefer the simplest solution; don't add abstractions or tools the project doesn't already need.
+  - **YAGNI** — Build for the current phase; don't implement things before they're required.
+  - **Single Responsibility** — Each file and function does one thing; keep UI, state, logic, and types separate.
+  - **DRY** — Don't duplicate logic or data; extract it so each piece of knowledge lives in one place.
 - **Critical Dependencies:** List the main frameworks and *why* they are used (e.g., "We use Axios for HTTP because of interceptors").
 - **Entrypoints:** The main binaries, server starts, or CLI entry files.
 
