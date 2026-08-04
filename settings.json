@@ -30,7 +30,7 @@
     },
     "npm:context-mode",
     "npm:pi-mcp-adapter",
-    "/home/dayatani/pria-random/pi-bash-layout"
+    "git:github.com/xiliumz/pi-minimal"
   ],
   "theme": "dark"
 }
