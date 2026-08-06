@@ -12,24 +12,7 @@
     "showTerminalProgress": true
   },
   "packages": [
-    {
-      "source": "npm:pi-hashline-edit",
-      "extensions": [
-        "-index.ts"
-      ],
-      "prompts": [
-        "-prompts/edit-guidelines.md",
-        "-prompts/edit-snippet.md",
-        "-prompts/edit.md",
-        "-prompts/grep-snippet.md",
-        "-prompts/grep.md",
-        "-prompts/read-snippet.md",
-        "-prompts/read-guidelines.md",
-        "-prompts/read.md"
-      ]
-    },
     "npm:context-mode",
-    "npm:pi-mcp-adapter",
     "git:github.com/xiliumz/pi-minimal",
     "git:https://github.com/xiliumz/pi-file-injector"
   ],
