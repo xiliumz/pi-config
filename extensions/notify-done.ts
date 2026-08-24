@@ -25,6 +25,7 @@ const QUIET_SECONDS = 3;
 
 let runStartedAt: number | null = null;
 let lastPreview: string | undefined;
+let notified = false;
 
 function escapePs(s: string): string {
 	return s.replace(/'/g, "''");
@@ -142,6 +143,7 @@ export default function (pi: ExtensionAPI) {
 	pi.on("agent_start", async () => {
 		runStartedAt = Date.now();
 		lastPreview = undefined;
+		notified = false;
 	});
 
 	// Capture last assistant text from the low-level run (settled event has no messages)
@@ -152,15 +154,18 @@ export default function (pi: ExtensionAPI) {
 
 	// Truly idle — no retry / compact / follow-up left
 	pi.on("agent_settled", async (_event, ctx) => {
+		if (notified) return;
 		if (ctx.mode === "print" || ctx.mode === "json") return;
 
 		if (QUIET_SECONDS > 0 && runStartedAt != null) {
 			const elapsed = (Date.now() - runStartedAt) / 1000;
 			if (elapsed < QUIET_SECONDS) {
+				notified = true;
 				runStartedAt = null;
 				return;
 			}
 		}
+		notified = true;
 		runStartedAt = null;
 
 		await fire(lastPreview ?? DEFAULT_BODY);
