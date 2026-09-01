@@ -3,26 +3,18 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 const TIMER_ID = "agent-timer";
 
 export function formatElapsed(milliseconds: number): string {
-	const totalSeconds = Math.floor(milliseconds / 1000);
-	const seconds = totalSeconds % 60;
-	const totalMinutes = Math.floor(totalSeconds / 60);
-	const minutes = totalMinutes % 60;
-	const hours = Math.floor(totalMinutes / 60);
-
-	return hours > 0
-		? `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
-		: `${minutes}:${String(seconds).padStart(2, "0")}`;
+	return `${(milliseconds / 1000).toFixed(1)}s`;
 }
 
 export default function (pi: ExtensionAPI) {
 	let startedAt: number | null = null;
 	let timer: ReturnType<typeof setInterval> | null = null;
 
-	pi.registerEntryRenderer(TIMER_ID, (entry) => {
+	pi.registerEntryRenderer(TIMER_ID, (entry, _options, theme) => {
 		const elapsed = (entry.data as { elapsed: string }).elapsed;
-		const text = `Agent ran for ${elapsed}`;
+		const text = `Took ${elapsed}`;
 		return {
-			render: (width) => [text.slice(0, Math.max(0, width))],
+			render: (width) => [theme.fg("dim", text.slice(0, Math.max(0, width)))],
 			invalidate() {},
 		};
 	});
@@ -34,7 +26,8 @@ export default function (pi: ExtensionAPI) {
 
 	function showRunning(ctx: ExtensionContext): void {
 		if (startedAt === null) return;
-		ctx.ui.setStatus(TIMER_ID, `running ${formatElapsed(Date.now() - startedAt)}`);
+		const text = `running ${formatElapsed(Date.now() - startedAt)}`;
+		ctx.ui.setStatus(TIMER_ID, ctx.ui.theme.fg("dim", text));
 	}
 
 	pi.on("agent_start", (_event, ctx) => {

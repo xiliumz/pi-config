@@ -4,16 +4,17 @@ import test from "node:test";
 import agentTimer, { formatElapsed } from "../extensions/agent-timer.ts";
 
 test("formats agent runtime", () => {
-	assert.equal(formatElapsed(0), "0:00");
-	assert.equal(formatElapsed(59_999), "0:59");
-	assert.equal(formatElapsed(60_000), "1:00");
-	assert.equal(formatElapsed(3_661_000), "1:01:01");
+	assert.equal(formatElapsed(0), "0.0s");
+	assert.equal(formatElapsed(1_249), "1.2s");
+	assert.equal(formatElapsed(60_000), "60.0s");
 });
 
 test("adds runtime below completed answer", () => {
 	const handlers: Record<string, (event: unknown, ctx: any) => void> = {};
 	const entries: Array<{ type: string; data: { elapsed: string } }> = [];
-	let renderEntry: ((entry: any) => { render(width: number): string[] }) | undefined;
+	let renderEntry:
+		| ((entry: any, options: any, theme: any) => { render(width: number): string[] })
+		| undefined;
 	const pi = {
 		on: (name: string, handler: (event: unknown, ctx: any) => void) => {
 			handlers[name] = handler;
@@ -25,13 +26,28 @@ test("adds runtime below completed answer", () => {
 	} as any;
 	const ctx = {
 		hasUI: true,
-		ui: { setStatus: () => {} },
+		ui: {
+			setStatus: () => {},
+			theme: { fg: (_color: string, text: string) => text },
+		},
 	} as any;
 
 	agentTimer(pi);
 	handlers.agent_start?.({}, ctx);
 	handlers.agent_settled?.({}, ctx);
 
-	assert.deepEqual(entries, [{ type: "agent-timer", data: { elapsed: "0:00" } }]);
-	assert.deepEqual(renderEntry?.({ data: entries[0].data }).render(80), ["Agent ran for 0:00"]);
+	assert.deepEqual(entries, [{ type: "agent-timer", data: { elapsed: "0.0s" } }]);
+	let color: string | undefined;
+	const rendered = renderEntry?.(
+		{ data: entries[0].data },
+		{},
+		{
+			fg: (name: string, text: string) => {
+				color = name;
+				return text;
+			},
+		},
+	).render(80);
+	assert.equal(color, "dim");
+	assert.deepEqual(rendered, ["Took 0.0s"]);
 });
