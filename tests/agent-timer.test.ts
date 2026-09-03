@@ -6,7 +6,8 @@ import agentTimer, { formatElapsed } from "../extensions/agent-timer.ts";
 test("formats agent runtime", () => {
 	assert.equal(formatElapsed(0), "0.0s");
 	assert.equal(formatElapsed(1_249), "1.2s");
-	assert.equal(formatElapsed(60_000), "60.0s");
+	assert.equal(formatElapsed(59_999), "1m 0.0s");
+	assert.equal(formatElapsed(61_249), "1m 1.2s");
 });
 
 test("adds runtime below completed answer", () => {

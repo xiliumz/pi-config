@@ -3,7 +3,10 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 const TIMER_ID = "agent-timer";
 
 export function formatElapsed(milliseconds: number): string {
-	return `${(milliseconds / 1000).toFixed(1)}s`;
+	const tenths = Math.round(milliseconds / 100);
+	const minutes = Math.floor(tenths / 600);
+	const seconds = ((tenths % 600) / 10).toFixed(1);
+	return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
 }
 
 export default function (pi: ExtensionAPI) {
