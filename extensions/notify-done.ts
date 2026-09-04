@@ -2,11 +2,11 @@
  * Notify when the agent finishes and is waiting for input.
  *
  * Channels (auto-detected):
- * - Linux desktop: notify-send
- * - macOS: osascript notification
  * - Windows Terminal / WSL: PowerShell toast
+ * - macOS: osascript notification
  * - Kitty: OSC 99
  * - Other terminals: OSC 777 (Ghostty, iTerm2, WezTerm, urxvt)
+ * - Linux desktop: notify-send
  * - Terminal bell (fallback if all notification channels fail)
  *
  * Skips runs shorter than QUIET_SECONDS (avoids spam on instant replies).
@@ -78,6 +78,32 @@ async function notifyDesktop(title: string, body: string): Promise<boolean> {
 		}
 	}
 
+	if (platform === "darwin") {
+		try {
+			const script = `display notification "${escapeApple(body)}" with title "${escapeApple(title)}"`;
+			await execFileAsync("osascript", ["-e", script]);
+			return true;
+		} catch {
+			// fall through
+		}
+	}
+
+	if (process.env.KITTY_WINDOW_ID) {
+		try {
+			notifyOSC99(title, body);
+			return true;
+		} catch {
+			// fall through
+		}
+	}
+
+	try {
+		notifyOSC777(title, body);
+		return true;
+	} catch {
+		// fall through to notify-send
+	}
+
 	if (platform === "linux") {
 		try {
 			await execFileAsync("notify-send", [
@@ -90,30 +116,11 @@ async function notifyDesktop(title: string, body: string): Promise<boolean> {
 			]);
 			return true;
 		} catch {
-			// fall through to terminal protocols
+			// fall through to terminal bell
 		}
 	}
 
-	if (platform === "darwin") {
-		try {
-			const script = `display notification "${escapeApple(body)}" with title "${escapeApple(title)}"`;
-			await execFileAsync("osascript", ["-e", script]);
-			return true;
-		} catch {
-			// fall through
-		}
-	}
-
-	try {
-		if (process.env.KITTY_WINDOW_ID) {
-			notifyOSC99(title, body);
-		} else {
-			notifyOSC777(title, body);
-		}
-		return true;
-	} catch {
-		return false;
-	}
+	return false;
 }
 
 function previewFromMessages(messages: unknown[]): string | undefined {
