@@ -38,13 +38,34 @@ function loadCompactionModel(cwd: string, projectTrusted: boolean) {
 export default function (pi: ExtensionAPI) {
   pi.on("session_before_compact", async (event, ctx) => {
     const configured = loadCompactionModel(ctx.cwd, ctx.isProjectTrusted());
-    const model = configured
-      ? ctx.modelRegistry.find(configured.provider, configured.model)
-      : undefined;
-    if (!model) return;
+    if (!configured) {
+      ctx.ui.notify(
+        "Compaction: no compactionModel configured; using Pi default",
+        "warning",
+      );
+      return;
+    }
+
+    const modelName = `${configured.provider}/${configured.model}`;
+    const model = ctx.modelRegistry.find(configured.provider, configured.model);
+    if (!model) {
+      ctx.ui.notify(
+        `Compaction: model ${modelName} not found; using Pi default`,
+        "warning",
+      );
+      return;
+    }
 
     const auth = await ctx.modelRegistry.getApiKeyAndHeaders(model);
-    if (!auth.ok) return;
+    if (!auth.ok) {
+      ctx.ui.notify(
+        `Compaction: no auth for ${modelName}; using Pi default`,
+        "warning",
+      );
+      return;
+    }
+
+    ctx.ui.notify(`Compaction: using ${modelName}`, "info");
 
     const headers = auth.headers
       ? Object.fromEntries(
@@ -68,8 +89,14 @@ export default function (pi: ExtensionAPI) {
         uuidv7(),
       );
 
+      ctx.ui.notify(`Compaction completed with ${modelName}`, "info");
       return { compaction: result };
-    } catch {
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "request failed";
+      ctx.ui.notify(
+        `Compaction failed with ${modelName}: ${reason}; using Pi default`,
+        "warning",
+      );
       return;
     }
   });
