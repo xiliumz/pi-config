@@ -7,7 +7,7 @@
  * - Windows Terminal / WSL: PowerShell toast
  * - Kitty: OSC 99
  * - Other terminals: OSC 777 (Ghostty, iTerm2, WezTerm, urxvt)
- * - Terminal bell
+ * - Terminal bell (fallback if all notification channels fail)
  *
  * Skips runs shorter than QUIET_SECONDS (avoids spam on instant replies).
  */
@@ -62,7 +62,7 @@ function bell(): void {
 	process.stdout.write("\x07");
 }
 
-async function notifyDesktop(title: string, body: string): Promise<void> {
+async function notifyDesktop(title: string, body: string): Promise<boolean> {
 	const platform = process.platform;
 
 	if (process.env.WT_SESSION) {
@@ -72,7 +72,7 @@ async function notifyDesktop(title: string, body: string): Promise<void> {
 				"-Command",
 				windowsToastScript(title, body),
 			]);
-			return;
+			return true;
 		} catch {
 			// fall through
 		}
@@ -88,7 +88,7 @@ async function notifyDesktop(title: string, body: string): Promise<void> {
 				title,
 				body,
 			]);
-			return;
+			return true;
 		} catch {
 			// fall through to terminal protocols
 		}
@@ -98,16 +98,21 @@ async function notifyDesktop(title: string, body: string): Promise<void> {
 		try {
 			const script = `display notification "${escapeApple(body)}" with title "${escapeApple(title)}"`;
 			await execFileAsync("osascript", ["-e", script]);
-			return;
+			return true;
 		} catch {
 			// fall through
 		}
 	}
 
-	if (process.env.KITTY_WINDOW_ID) {
-		notifyOSC99(title, body);
-	} else {
-		notifyOSC777(title, body);
+	try {
+		if (process.env.KITTY_WINDOW_ID) {
+			notifyOSC99(title, body);
+		} else {
+			notifyOSC777(title, body);
+		}
+		return true;
+	} catch {
+		return false;
 	}
 }
 
@@ -135,8 +140,7 @@ function previewFromMessages(messages: unknown[]): string | undefined {
 }
 
 async function fire(body: string = DEFAULT_BODY): Promise<void> {
-	bell();
-	await notifyDesktop(TITLE, body);
+	if (!(await notifyDesktop(TITLE, body))) bell();
 }
 
 export default function (pi: ExtensionAPI) {
