@@ -5,8 +5,11 @@
  * - Windows Terminal / WSL: PowerShell toast
  * - macOS: osascript notification
  * - Kitty: OSC 99
- * - Other terminals: OSC 777 (Ghostty, iTerm2, WezTerm, urxvt)
- * - Linux desktop: notify-send
+ * - Recognized other terminals: OSC 777 (Ghostty, iTerm2, WezTerm, urxvt)
+ * - Linux desktop: notify-send (last desktop fallback)
+ *
+ * OSC uses tmux passthrough when available. Terminal writes are best-effort:
+ * success does not confirm that the desktop displayed the notification.
  * - Terminal bell (fallback if all notification channels fail)
  *
  * Skips runs shorter than QUIET_SECONDS (avoids spam on instant replies).
@@ -49,13 +52,30 @@ function windowsToastScript(title: string, body: string): string {
 	].join("; ");
 }
 
-function notifyOSC777(title: string, body: string): void {
-	process.stdout.write(`\x1b]777;notify;${title};${body}\x07`);
+async function writeOSC(sequence: string): Promise<void> {
+	if (!process.stdout.isTTY) throw new Error("No terminal for OSC notification");
+	if (process.env.TMUX) {
+		const args = ["show-options", "-Apv"];
+		if (process.env.TMUX_PANE) args.push("-t", process.env.TMUX_PANE);
+		args.push("allow-passthrough");
+		const { stdout } = await execFileAsync("tmux", args, { timeout: 1000 });
+		if (!["on", "all"].includes(stdout.trim())) {
+			throw new Error("tmux passthrough is disabled");
+		}
+		sequence = `\x1bPtmux;${sequence.replace(/\x1b/g, "\x1b\x1b")}\x1b\\`;
+	}
+	process.stdout.write(sequence);
 }
 
-function notifyOSC99(title: string, body: string): void {
-	process.stdout.write(`\x1b]99;i=pi-done:d=0;${title}\x1b\\`);
-	process.stdout.write(`\x1b]99;i=pi-done:p=body:d=1;${body}\x1b\\`);
+async function notifyOSC777(title: string, body: string): Promise<void> {
+	await writeOSC(`\x1b]777;notify;${title.replace(/;/g, ",")};${body.replace(/;/g, ",")}\x07`);
+}
+
+async function notifyOSC99(title: string, body: string): Promise<void> {
+	await writeOSC(
+		`\x1b]99;i=pi-done:d=0;${title}\x1b\\` +
+		`\x1b]99;i=pi-done:p=body:d=1;${body}\x1b\\`,
+	);
 }
 
 function bell(): void {
@@ -64,6 +84,9 @@ function bell(): void {
 
 async function notifyDesktop(title: string, body: string): Promise<boolean> {
 	const platform = process.platform;
+	// Notification text must not inject terminal control sequences.
+	title = title.replace(/[\x00-\x1f\x7f-\x9f]/g, "");
+	body = body.replace(/[\x00-\x1f\x7f-\x9f]/g, "");
 
 	if (process.env.WT_SESSION) {
 		try {
@@ -90,18 +113,24 @@ async function notifyDesktop(title: string, body: string): Promise<boolean> {
 
 	if (process.env.KITTY_WINDOW_ID) {
 		try {
-			notifyOSC99(title, body);
+			await notifyOSC99(title, body);
 			return true;
 		} catch {
 			// fall through
 		}
 	}
 
-	try {
-		notifyOSC777(title, body);
-		return true;
-	} catch {
-		// fall through to notify-send
+	const supportsOSC777 =
+		/^(ghostty|iTerm\.app|WezTerm)$/i.test(process.env.TERM_PROGRAM ?? "") ||
+		process.env.GHOSTTY_RESOURCES_DIR || process.env.ITERM_SESSION_ID ||
+		process.env.WEZTERM_PANE || /^rxvt-unicode/.test(process.env.TERM ?? "");
+	if (supportsOSC777) {
+		try {
+			await notifyOSC777(title, body);
+			return true;
+		} catch {
+			// fall through to notify-send
+		}
 	}
 
 	if (platform === "linux") {
@@ -166,7 +195,7 @@ export default function (pi: ExtensionAPI) {
 	// Truly idle — no retry / compact / follow-up left
 	pi.on("agent_settled", async (_event, ctx) => {
 		if (notified) return;
-		if (ctx.mode === "print" || ctx.mode === "json") return;
+		if (ctx.mode !== "tui") return;
 
 		if (QUIET_SECONDS > 0 && runStartedAt != null) {
 			const elapsed = (Date.now() - runStartedAt) / 1000;
