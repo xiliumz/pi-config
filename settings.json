@@ -1,10 +1,13 @@
 {
-  "lastChangelogVersion": "0.80.10",
-  "defaultProvider": "xai",
-  "defaultModel": "grok-4.5",
-  "defaultThinkingLevel": "high",
+  "lastChangelogVersion": "0.85.0",
+  "defaultProvider": "openai-codex",
+  "defaultModel": "gpt-5.6-luna",
+  "defaultThinkingLevel": "max",
   "enabledModels": [
-    "xai/grok-4.5"
+    "openrouter/deepseek/deepseek-v4-flash-0731",
+    "xai/grok-4.6",
+    "openai-codex/gpt-5.6-luna",
+    "openai-codex/gpt-6-astra"
   ],
   "editorPaddingX": 0,
   "hideThinkingBlock": false,
@@ -13,8 +16,18 @@
   },
   "packages": [
     "npm:context-mode",
-    "git:github.com/xiliumz/pi-minimal",
+    {
+      "source": "git:github.com/xiliumz/pi-minimal",
+      "extensions": [
+        "+extensions/index.ts"
+      ]
+    },
     "git:https://github.com/xiliumz/pi-file-injector"
   ],
-  "theme": "dark"
+  "theme": "dark",
+  "extensions": [
+    "+extensions/ctx-timeout.ts",
+    "+extensions/agent-timer.ts",
+    "+extensions/thinking-select.ts"
+  ]
 }
