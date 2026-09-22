@@ -1,4 +1,5 @@
 {
   "app.thinking.cycle": [],
-  "app.session.resume": "alt+r"
+  "app.session.resume": "alt+r",
+  "app.session.new": "alt+n"
 }
