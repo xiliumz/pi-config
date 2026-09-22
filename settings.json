@@ -22,7 +22,8 @@
         "+extensions/index.ts"
       ]
     },
-    "git:https://github.com/xiliumz/pi-file-injector"
+    "git:https://github.com/xiliumz/pi-file-injector",
+    "npm:pi-goal-x"
   ],
   "theme": "dark",
   "extensions": [
