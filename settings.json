@@ -16,14 +16,9 @@
   },
   "packages": [
     "npm:context-mode",
-    {
-      "source": "git:github.com/xiliumz/pi-minimal",
-      "extensions": [
-        "+extensions/index.ts"
-      ]
-    },
-    "git:https://github.com/xiliumz/pi-file-injector",
-    "npm:pi-goal-x"
+    "npm:pi-goal-x@0.31.6",
+    "npm:@xiliumz/pi-minimal",
+    "npm:pi-auto-inject"
   ],
   "theme": "dark",
   "extensions": [
