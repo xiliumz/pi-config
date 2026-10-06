@@ -16,9 +16,9 @@
   },
   "packages": [
     "npm:context-mode",
-    "npm:pi-goal-x@0.31.6",
     "npm:@xiliumz/pi-minimal",
-    "npm:pi-auto-inject"
+    "npm:pi-auto-inject",
+    "npm:@juicesharp/rpiv-ask-user-question"
   ],
   "theme": "dark",
   "extensions": [
