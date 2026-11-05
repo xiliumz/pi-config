@@ -1,20 +1,17 @@
 {
- "providers": {
-   "openrouter": {
-     "modelOverrides": {
-       "deepseek/deepseek-v4-pro": {
-         "name": "DeepSeek V4 Pro (via OpenRouter)",
-         "thinkingLevelMap": {
-           "xhigh": "xhigh",
-         },
-         "compat": {
-           "openRouterRouting": {
-             "only": ["deepseek"],
-             "allow_fallbacks": false
-           }
-         }
-       }
-     }
-   }
- }
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "openrouter": {
+      "modelOverrides": {
+        "deepseek/deepseek-v4.1-flash-1017": {
+          "compat": {
+            "openRouterRouting": {
+              "order": ["digitalocean"],
+              "allow_fallbacks": false
+            }
+          }
+        }
+      }
+    }
+  }
 }
