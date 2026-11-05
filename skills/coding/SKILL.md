@@ -1,17 +1,17 @@
 ---
 name: coding
-description: "REQUIRED: read this before writing or editing code or tests, even for one-line fixes, and before reviewing code changes. It defines the mandatory workflow: inspect project conventions first, apply KISS/YAGNI/single responsibility/DRY, stay within scope, run the project's real checks, and finish with a 5-point self-review report. Skip only for pure questions with no file changes."
+description: "Edits and reviews code to match the project's existing conventions. Use when fixing a bug, adding or refactoring code, writing tests, or reviewing a diff. Reads current patterns before changing anything, stays in scope, runs the repo's real checks, and reports evidence. Proportional — skip typo-level edits and pure questions."
 ---
 
 # Coding
 
-Work as a senior engineer inside the project's existing architecture. Project instructions (AGENTS.md etc.) and the user's approval requirements override this skill.
+Match the project's existing architecture. Project instructions (AGENTS.md etc.) and the user's approval requirements override this skill.
 
 ## Hard rules
 
 Breaking any of these fails the task:
 
-1. **Read before writing.** Open the target code, its callers, and its tests before editing.
+1. **Read before writing.** Open the target code, plus its callers and tests when the change touches behavior.
 2. **Use what the project already uses.** That means its stack, helpers, naming, imports, error handling, and test style. Ask before adding dependencies, abstractions, or new patterns.
 3. **Stay in scope.** Change only what was asked and preserve unrelated user changes. Ask before expanding scope, changing public contracts, or doing anything destructive.
 4. **Never invent.** Commands, scripts, APIs, and requirements must come from the repo or the user. Separate confirmed facts from inferences. Ask when a gap affects correctness.
@@ -44,21 +44,22 @@ Note naming, imports/exports, module boundaries, data flow, state, API access, e
 - If a check can't run, report the exact blocker. Separate new failures from confirmed pre-existing ones.
 - For instructions-only or docs-only changes, use read-only structural checks instead of application tests.
 
-## 4. Self-review (max 3 rounds)
+## 4. Review and report
 
-Review the final diff. Mark each item **PASS**, **FAIL**, or **NOT CHECKED** with brief evidence. NOT CHECKED is not a pass.
+Review the final diff, then report. One table, no separate write-up. Each item gets **PASS**, **FAIL**, or **NOT CHECKED** with brief evidence, and each is answerable from the diff or a command:
 
-1. **Scope:** the change meets the request, has no unrelated edits, and preserves user work.
-2. **Conventions and principles:** it matches the project's architecture, naming, and formatting, and follows KISS, YAGNI, single responsibility, and DRY.
-3. **Correctness and edge cases:** behavior, callers, contracts, error handling, and null, invalid, and failure paths are covered.
-4. **Secrets and security:** no exposed secrets, no sensitive logging, and no new risk.
-5. **Validation:** the applicable checks ran successfully on the final version.
+Scale to the change: a typo, comment, or single-value edit reports items 1 and 5 only.
 
-If any item is not PASS, fix it within scope, recheck, and start the next round. If you are blocked by access, tools, or an approval, ask for the specific decision you need. After round 3, stop and report what remains unresolved. Never weaken tests, suppress failures, or change acceptance criteria to get a pass.
+1. **Diff scope:** walk every hunk. Each one traces to the request. No unrelated edits, debug leftovers, commented-out code, or formatter churn.
+2. **Conventions:** the changed lines use existing helpers, naming, imports, error handling, and test style. Cite the file you matched.
+3. **Correctness:** behavior, callers, contracts, and null/invalid/failure paths. Name the edge case you actually handled.
+4. **Secrets and risk:** answer three yes/no questions — is a secret in the diff, is a sensitive value logged, does this add a dependency, network call, or filesystem write?
+5. **Validation:** for each check, the command, its exit status, and the verbatim failing lines if any.
 
-## 5. Report
+Fix every FAIL within scope, then recheck only the failing items. Don't repeat the whole pass to hunt for a PASS.
 
-- What changed: the behavior and affected paths.
-- The 5 statuses with evidence, and the number of rounds used.
-- The commands or checks run, with their actual results.
-- Report an overall pass only when all 5 items are PASS. If user action is needed, end with one concrete next step.
+Never weaken tests, suppress failures, or move the goalposts to get a pass.
+
+**Verdict:** PASS only when all five are PASS. If an item is legitimately unreachable — no access, no tool, a decision you need — name it and report `PASS with gaps`. Never report PASS while an item is FAIL.
+
+**Report:** what changed as behavior plus affected paths, the table, and the commands run. If the user must act, end with one concrete next step.
