@@ -4,9 +4,11 @@
     "openrouter": {
       "modelOverrides": {
         "deepseek/deepseek-v4.1-flash-1017": {
+          // "maxTokens": 262144,
           "compat": {
             "openRouterRouting": {
-              "order": ["digitalocean"],
+              // "order": ["baseten/fast"],
+              "order": ["together"],
               "allow_fallbacks": false
             }
           }
