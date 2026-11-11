@@ -13,9 +13,9 @@ export function capTimeout(value: unknown, maxMs: number, unitMs: number): numbe
 
 export function timeoutGuideline(timeoutMs: number): string {
 	return (
-		`Calls to bash, read, edit, write, and ctx_* tools have a hard timeout of ${timeoutMs / 60_000} min (${timeoutMs} ms), ` +
+		`Calls to bash, read, edit, write, ctx_execute, and ctx_batch have a hard timeout of ${timeoutMs / 60_000} min (${timeoutMs} ms), ` +
 		"set by the user via the PI_TOOL_TIMEOUT_MS env var. " +
-		"The `timeout` param of bash (seconds) and ctx_* tools (ms) is capped to it. " +
+		"The `timeout` param of bash (seconds) and `timeoutMs` param of ctx_execute are capped to it. " +
 		"A call that runs past it is aborted on its own and returns an error result; the run continues. " +
 		"MCP tools (mcp__*) instead fail after their server's `timeout` in mcp.json (60 s by default) " +
 		"without a progress update, also as an error result for that call only. " +

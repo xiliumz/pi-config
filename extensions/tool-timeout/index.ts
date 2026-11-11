@@ -7,12 +7,11 @@ import {
 
 import { capTimeout, parseTimeoutMs, runWithTimeout, timeoutGuideline } from "./timeout.ts";
 
-// Milliseconds per unit of each tool's `timeout` param.
-const TIMEOUT_UNIT_MS: Record<string, number> = {
-	bash: 1000,
-	ctx_execute: 1,
-	ctx_execute_file: 1,
-	ctx_batch_execute: 1,
+// Each tool's timeout param and its milliseconds per unit. Tool schemas reject unknown fields,
+// so the name must match exactly. ctx_batch has no timeout param (context-mode caps it at 10 min).
+const TIMEOUT_PARAMS: Record<string, { param: string; unitMs: number }> = {
+	bash: { param: "timeout", unitMs: 1000 },
+	ctx_execute: { param: "timeoutMs", unitMs: 1 },
 };
 // Active built-ins without a `timeout` param. Re-registering them adds one; registering
 // inactive built-ins (grep, find, ls) would activate them, so they are left alone.
@@ -47,10 +46,11 @@ export default function toolTimeoutExtension(pi: ExtensionAPI): void {
 	});
 
 	pi.on("tool_call", (event) => {
-		const unitMs = TIMEOUT_UNIT_MS[event.toolName];
-		if (unitMs === undefined) return;
+		const timeoutParam = TIMEOUT_PARAMS[event.toolName];
+		if (timeoutParam === undefined) return;
 
-		const input = event.input as { timeout?: unknown };
-		input.timeout = capTimeout(input.timeout, timeoutMs, unitMs);
+		const input = event.input as Record<string, unknown>;
+		const { param, unitMs } = timeoutParam;
+		input[param] = capTimeout(input[param], timeoutMs, unitMs);
 	});
 }
