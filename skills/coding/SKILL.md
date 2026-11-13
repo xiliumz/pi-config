@@ -1,65 +1,74 @@
 ---
 name: coding
-description: "Edits and reviews code to match the project's existing conventions. Use when fixing a bug, adding or refactoring code, writing tests, or reviewing a diff. Reads current patterns before changing anything, stays in scope, runs the repo's real checks, and reports evidence. Proportional — skip typo-level edits and pure questions."
+description: "Use when a task writes or changes code or reviews a diff — including small edits. Not for pure questions or reads that change no files."
 ---
 
 # Coding
 
-Match the project's existing architecture. Project instructions (AGENTS.md etc.) and the user's approval requirements override this skill.
+Match the project's existing patterns before you change them. Project instructions (AGENTS.md, README, CONTRIBUTING) and the user's approval requirements override this skill.
 
-## Hard rules
+## Non-negotiables
 
-Breaking any of these fails the task:
+1. **Read before you write.** Read the file you're editing in full, not just the hunk, plus its callers and tests when behavior changes.
+2. **No command, no claim.** Never report a check as passed unless it ran and passed in this session. Never claim a test exists, a script is defined, or a dependency is installed without seeing it.
+3. **No git side effects unless asked.** Don't commit, branch, stash, amend, or push. Leave the diff in the working tree for review.
+4. **Stay in scope.** Change only what was asked, and leave unrelated working-tree changes untouched.
 
-1. **Read before writing.** Open the target code, plus its callers and tests when the change touches behavior.
-2. **Use what the project already uses.** That means its stack, helpers, naming, imports, error handling, and test style. Ask before adding dependencies, abstractions, or new patterns.
-3. **Stay in scope.** Change only what was asked and preserve unrelated user changes. Ask before expanding scope, changing public contracts, or doing anything destructive.
-4. **Never invent.** Commands, scripts, APIs, and requirements must come from the repo or the user. Separate confirmed facts from inferences. Ask when a gap affects correctness.
-5. **Never claim a check passed unless it ran and passed.**
+## Ask before you act
 
-## 1. Inspect (proportional to the task)
+Stop and get a yes for any of these:
 
-- **Small fix:** read the affected code and its immediate context.
-- **Larger or cross-cutting change:** also read AGENTS.md, README, and CONTRIBUTING; the package manifest; the lint, format, type, and framework config; 3–5 representative source files; and the relevant tests.
+- A dependency, abstraction, or pattern the repo doesn't already use.
+- A public contract change: API shape, schema, exported signature, CLI flag, config key.
+- Anything destructive or irreversible: deleting or rewriting data, force-push, dropping a migration.
+- Work that spreads beyond the files the request names.
+- A bug you noticed but weren't asked to fix. Report it separately; don't fix it quietly.
 
-Note naming, imports/exports, module boundaries, data flow, state, API access, error handling, logging, and test conventions (location, fixtures, mock vs real services).
+## 1. Read
 
-## 2. Implement
+Scale the reading to the change.
 
-- **KISS:** pick the simplest solution that works.
-- **YAGNI:** build only what is needed now.
-- **Single responsibility:** each function or file does one job. Keep UI, state, logic, and types apart.
-- **DRY:** keep one source of truth. Don't force an abstraction just because two snippets look alike.
-- Handle null, undefined, invalid-input, and failure cases explicitly.
-- Don't hardcode secrets or log sensitive values. Follow the project's config and environment-variable conventions.
-- Update the types, callers, tests, and API specs the change requires. If that goes beyond scope, stop and ask.
-- **File size:** if a new or modified handwritten source file (tests included) exceeds about 200 lines, check whether it holds separable responsibilities. This is advisory. Split only when the result is clearer, and explain any exception in the report. Exclude generated files, lockfiles, fixtures, docs, and vendored code. A project policy takes precedence.
+- **Small fix:** `rg` the symbol, error string, or config key repo-wide, then read the affected file in full and the nearest test.
+- **Cross-cutting change:** also read AGENTS.md, README, CONTRIBUTING, the package manifest, the lint/type/format/framework config, 3–5 representative source files, and the tests covering the area.
 
-## 3. Validate
+Note what you will copy, not invent: naming, imports and exports, module boundaries, data flow, state, error handling, logging, and test conventions (location, fixtures, mock vs real services). If the repo has no AGENTS.md or no tests, say so and name what you used instead.
 
-- Use only commands found in the project's scripts, config, or docs. Don't assume a package manager or test framework.
-- Add or update focused tests for the changed behavior, following existing conventions.
-- Run the relevant tests plus lint, format, type, and build checks.
-- Don't install dependencies, alter external data, or run destructive setup just to validate. Ask when approval is required.
-- If a check can't run, report the exact blocker. Separate new failures from confirmed pre-existing ones.
-- For instructions-only or docs-only changes, use read-only structural checks instead of application tests.
+## 2. Write
 
-## 4. Review and report
+- Pick the simplest solution that works and build only what's needed now.
+- One job per function or file. Keep UI, state, logic, and types apart.
+- Reuse existing helpers even where you'd write it differently. DRY the behavior, not the shape: two similar snippets are not automatically one abstraction.
+- Handle null, undefined, invalid input, and failure explicitly.
+- No secrets in code or logs. Follow the repo's config and environment-variable conventions.
+- Update the callers, types, and tests the change requires. If that exceeds scope, stop and ask.
+- **File size:** if a new or modified handwritten source file (tests included) passes about 200 lines, check whether it holds separable responsibilities. Advisory — split only when the result is clearer, and explain the exception. Excludes generated code, lockfiles, fixtures, docs, and vendored code. A project policy wins.
 
-Review the final diff, then report. One table, no separate write-up. Each item gets **PASS**, **FAIL**, or **NOT CHECKED** with brief evidence, and each is answerable from the diff or a command:
+## 3. Prove
 
-Scale to the change: a typo, comment, or single-value edit reports items 1 and 5 only.
+- **Bug fix: reproduce first.** Run the failing test or a command that shows the bug and quote its output before editing. A fix for a bug you never observed is a guess.
+- Add or update a focused test that fails without the change and passes with it, in the project's existing test style.
+- Run only commands the repo defines: package scripts, Makefile, CI config, or docs. Don't guess a package manager or test runner.
+- Run what covers the change — tests, then lint, types, format, build.
+- **Stop after two failed attempts at the same check.** Report the blocker, what you tried, and the verbatim error. Don't keep guessing.
+- Can't run a check? Report the exact blocker. Don't install dependencies, alter external data, or run destructive setup just to validate — ask.
+- Separate new failures from pre-existing ones. Say which is which, and how you know.
+- Docs-only or instructions-only change: use read-only structural checks instead of application tests.
 
-1. **Diff scope:** walk every hunk. Each one traces to the request. No unrelated edits, debug leftovers, commented-out code, or formatter churn.
-2. **Conventions:** the changed lines use existing helpers, naming, imports, error handling, and test style. Cite the file you matched.
-3. **Correctness:** behavior, callers, contracts, and null/invalid/failure paths. Name the edge case you actually handled.
-4. **Secrets and risk:** answer three yes/no questions — is a secret in the diff, is a sensitive value logged, does this add a dependency, network call, or filesystem write?
-5. **Validation:** for each check, the command, its exit status, and the verbatim failing lines if any.
+## 4. Report
 
-Fix every FAIL within scope, then recheck only the failing items. Don't repeat the whole pass to hunt for a PASS.
+Review the diff hunk by hunk, then report a single table plus a short close. Replace the right column with PASS, FAIL, or NOT CHECKED plus its evidence.
 
-Never weaken tests, suppress failures, or move the goalposts to get a pass.
+| #   | Check            | Report this                                                                                                     |
+| --- | ---------------- | --------------------------------------------------------------------------------------------------------------- |
+| 1   | Diff scope       | Every hunk traces to the request. No unrelated edits, debug leftovers, commented-out code, or formatter churn.  |
+| 2   | Conventions      | Changed lines use existing helpers, naming, imports, error handling, and test style. Cite the file you matched. |
+| 3   | Correctness      | Behavior, callers, contracts, and null/invalid/failure paths. Name the edge case you handled.                   |
+| 4   | Secrets and risk | Three yes/no: secret in the diff, sensitive value logged, new dependency / network call / filesystem write.     |
+| 5   | Validation       | Each command, its exit status, and the verbatim failing lines if any.                                           |
 
-**Verdict:** PASS only when all five are PASS. If an item is legitimately unreachable — no access, no tool, a decision you need — name it and report `PASS with gaps`. Never report PASS while an item is FAIL.
+- **Scale:** a typo, comment, or single-value edit reports items 1 and 5 only. Everything else reports all five.
+- **Verdict:** PASS only when every item you reported is PASS. Fix in-scope FAILs, then re-run just that check. A known FAIL is never PASS. If an item is unreachable — no access, no tool, a decision you need — name it and report `PASS with gaps`.
+- **Review-only request:** change nothing; report against the same table.
+- Never weaken a test, suppress a failure, or move the goalposts to get a pass.
 
-**Report:** what changed as behavior plus affected paths, the table, and the commands run. If the user must act, end with one concrete next step.
+Close with what changed as behavior plus affected paths, then the commands you ran. If the user must act, end with one concrete next step: a command to run or a file to open.
