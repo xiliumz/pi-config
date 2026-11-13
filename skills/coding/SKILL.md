@@ -1,6 +1,6 @@
 ---
 name: coding
-description: "Use when a task writes or changes code or reviews a diff — including small edits. Not for pure questions or reads that change no files."
+description: "Use when a task writes, changes, or reviews code, tests, migrations, or a diff — including small edits. Not for pure questions or reads that change no files."
 ---
 
 # Coding
