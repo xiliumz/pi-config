@@ -22,7 +22,8 @@
         "+extensions/index.ts"
       ]
     },
-    "git:github.com/The-Terrans/pi-loop"
+    "git:github.com/The-Terrans/pi-loop",
+    "npm:pi-copy-code"
   ],
   "theme": "dark"
 }
