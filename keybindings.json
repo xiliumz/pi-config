@@ -1,5 +1,6 @@
 {
   "app.thinking.cycle": [],
   "app.session.resume": "alt+r",
-  "app.session.new": "alt+n"
+  "app.session.new": "alt+n",
+  "tui.editor.yank": []
 }
