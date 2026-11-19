@@ -50,7 +50,7 @@
           "cost": { "input": 0.035, "output": 0.15, "cacheRead": 0.0015, "cacheWrite": 0 },
           "contextWindow": 1048576,
           "maxTokens": 943718,
-          "promptCache": { "short": 180, "long": 180 },
+          "promptCache": { "short": 3600, "long": 3600 },
           "compat": {
             "supportsDeveloperRole": false,
             "thinkingFormat": "openrouter",
