@@ -5,6 +5,7 @@
       "modelOverrides": {
         "deepseek/deepseek-v4.1-flash-1017": {
           // "maxTokens": 262144,
+          "promptCache": { "short": 180, "long": 180 },
           "compat": {
             "openRouterRouting": {
               // "order": ["baseten/fast"],
@@ -12,8 +13,57 @@
               "allow_fallbacks": false
             }
           }
+        },
+        "meta/muse-ember": {
+          "promptCache": { "short": 180, "long": 180 },
+          "compat": {
+            "openRouterRouting": {
+              "order": ["google-vertex/global"],
+              "allow_fallbacks": false
+            }
+          }
         }
       }
+    },
+    // Same OpenRouter model, pinned to DeepSeek's official endpoint.
+    // Separate provider because a model ID can only exist once per provider.
+    "openrouter-deepseek": {
+      "name": "OpenRouter (DeepSeek official)",
+      "baseUrl": "https://openrouter.ai/api/v1",
+      "api": "openai-completions",
+      "apiKey": "!jq -r .openrouter.key /home/user/.pi/agent/auth.json",
+      "models": [
+        {
+          "id": "deepseek/deepseek-v4.1-flash-1017",
+          "name": "deepseek/deepseek-v4.1-flash-1017 (original)",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "off": "none",
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          },
+          "input": ["text", "image"],
+          "cost": { "input": 0.035, "output": 0.15, "cacheRead": 0.0015, "cacheWrite": 0 },
+          "contextWindow": 1048576,
+          "maxTokens": 943718,
+          "promptCache": { "short": 180, "long": 180 },
+          "compat": {
+            "supportsDeveloperRole": false,
+            "thinkingFormat": "openrouter",
+            "supportsStrictMode": true,
+            "sendSessionAffinityHeaders": true,
+            "requiresReasoningContentOnAssistantMessages": true,
+            "openRouterRouting": {
+              "order": ["deepseek"],
+              "allow_fallbacks": false
+            }
+          }
+        }
+      ]
     }
   }
 }
