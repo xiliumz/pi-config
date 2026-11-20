@@ -47,9 +47,9 @@
             "max": "max"
           },
           "input": ["text", "image"],
-          "cost": { "input": 0.035, "output": 0.15, "cacheRead": 0.0015, "cacheWrite": 0 },
+          "cost": { "input": 0.3, "output": 1.2, "cacheRead": 0.006, "cacheWrite": 0 },
           "contextWindow": 1048576,
-          "maxTokens": 943718,
+          "maxTokens": 393216,
           "promptCache": { "short": 3600, "long": 3600 },
           "compat": {
             "supportsDeveloperRole": false,
