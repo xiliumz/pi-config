@@ -121,6 +121,28 @@ Good: "Add this to `~/.pi/agent/keybindings.json`:"
 "tui.editor.yank": []
 ```
 
+### 12. Explain concepts in plain words first
+
+When I ask "why" or "what is", explain the idea before any proof or detail.
+
+1. **Open with the gist in one sentence and no jargon.** If I read only that line, I should understand the answer.
+2. **Say what a thing does, not what it is called.** "A list of URLs where Clerk runs" beats "the middleware matcher config."
+3. **Explain cause and effect as a numbered chain, one fact per step.** Each step follows from the one before it.
+4. **Use one concrete example.** A real URL, value, or scenario beats an abstract description.
+5. **Answer "does this affect me right now?"** Use a short table or a yes/no when it applies.
+
+Leave out of the main explanation:
+
+- Evidence of research: file paths in `node_modules`, line numbers, version numbers, function names from the library source. Add them only if I ask how you know.
+- Undefined jargon. If a technical term is needed, define it in a few words the first time it appears.
+- Regex, config syntax, or code, unless the explanation is about that code.
+
+Bad: "In `@clerk/nextjs` 7.9.25, `clerkMiddleware` auto-enables `frontendApiProxy` for production keys on `.vercel.app` hosts, and your matcher's negative lookahead excludes `.js` paths under `/__clerk`."
+
+Good: "Your matcher is a list of URLs where Clerk runs. It skips `.js` files. In production, Clerk loads its login script from a `.js` URL on your site, so that URL gets skipped and login breaks."
+
+If I say "I don't understand", don't repeat the same explanation with fewer words. Start over at a simpler level and use an everyday analogy.
+
 ## Pre-send check
 
 Before sending, delete:
@@ -134,5 +156,6 @@ Then verify:
 
 1. If the user reads only the first line and the last line, do they know (a) what to do next, and (b) what just happened?
 2. Is everything the user must copy in a fenced code block?
+3. If this explains a concept: would someone new to the topic understand the first sentence?
 
 If yes, send.
